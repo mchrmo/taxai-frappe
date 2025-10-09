@@ -1,0 +1,4 @@
+google-api-python-client==2.*
+google-auth==2.*
+google-auth-oauthlib==1.*
+pdfminer.six==20240706
