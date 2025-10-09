@@ -9,20 +9,6 @@ from googleapiclient.errors import HttpError
 
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
-jsonkey = {
-  "type": "service_account",
-  "project_id": "taxai-473614",
-  "private_key_id": "22a9902601e010f3460ddee9b822ad739cb725fa",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDyP1ic0kgeob0t\nV8bwstSRuPajt2x6VuXhE+Y4UgWP8Vc1pN/ih+ebzYhYwoL7c2dQgMAOhOJkOogr\neDmVdM1BoJxZZBas14KY1Z3ur05DuA4xbroEKTVGvx2O+7RPmFQRskbk6uClx52M\nXcF+JNYACnIPmQgYWT89wpyGrGb593ypPDN3BJrRWbkiT6UfGuRJySlAslJ6iCJ9\n/k57un2udAarvaVxm3Mh1S8lDuLk8YSx8wq2aMJA+dQeNT1r7b4MIGebh9+Zqk7a\nD/vGJmI6mdPf8BgqIulC2evymb6DSIg7LN4I+MeezfWejYN5jhJf5kyMa60buNGo\nesAKJrvJAgMBAAECggEAKKf3AELOdc2hSVXc/pKU2GwZgLqNCy9AX3kOf09Mva68\nezVTmdpDRcPF6Vej0f25Tip9kTI+KKImLl18FJhIxoXlF5+Tqqh0s5/OZLupP/ZI\n84To1T/xQBFdLZ0S0vT2zw2DlnHRCCGrUF5/1eLqw5D9OZ7uW9/GnF/oEzYmBjdu\nbY+Q2TOvp9v2hYWyo1dN3oALPHjHAEpARCq4XfhBouvGEtDFWC5JQyBRuQkM7dO0\nZQ6cc7i6MVgqqoPpzuffbcI+sfFjiXIVtLXG/MPHi6dnqWiYGQv1iulZYrReyJlk\nIAawVuL3wd5wdBVR3mMbdBTUCNKj6Z5Zv+mzJqDTsQKBgQD7jEpYakZXzQo0wlWg\nOxNM3H54MKZ+AexO3Dl9QcWT2YQltRR3xo80O8izybXELXk+tqzsdMaihYUn7GmJ\npzwLwPewqLnibEDTxdmW5u993riAYmEqFqB8hD2OjK29xrj92fJ6/MGbbJX2N5m3\n1PY4jcahFX3Adn111K0gbV27lQKBgQD2iOq5WmwU5YzWYlh29bhKCuk5BbY8w54e\nMd0akpiXXWlB181SDECOpuP8tcyoOjCa3tT3ortVJXbcN8mBwUHCjEomaEVUyao0\nX/AEmDVTTMyaq1V/yPtqvvZikFuMPybbUerlEiS5Vq+TiMyaDRMSU+XOSrb6iNSX\neYJ3sD5SZQKBgBO4kfOQkWc8yfoM6k2flAnIl5mwprzmRbKBDXjGeUj4GqYiJjKl\nvIBp13hQ7hEtR34lMDVxikkfkqrom/WQyOJbBJAzCi+4MPTpY/+yp0AFAA4AqIF2\nOKrKa1ELsmtYcxRjy+DchAk9YBxni4OgDJWud84VM0CtiXR9cf1C1cBpAoGAA36j\nXSdD+vPaEDvqpx0KlLoc3jsPf0MCncj1KmhDk3m2gUFu3qffzmXdO3rUQNo6UCey\neyQqZaWXTr3XtGgp53kXn/3AZdhJ+l4Vx+rkbp7bE6I0HxCZR8UXNwR218EZauh5\nXO/p51qsOHoq9FAVIiBgVJFIkLqZ0N/fEpVD/OUCgYAYQDYcNPS1lMSSZRh6V8jh\nhUfofAi1KnrrYluH7LfKQxpiPdRnR6flqDLbspx+6+npHXK3uTiKAjrD5CA6MRNh\ngt7tB+AVFoojDgmIz+WcRx/4BKsrFBhZgav8gJD/B5hcE+0+SbK8SzyVa2z9ksAn\nLC2ebOxxckJoz6ExckxU9w==\n-----END PRIVATE KEY-----\n",
-  "client_email": "taxai-drive@taxai-473614.iam.gserviceaccount.com",
-  "client_id": "112734673725470720797",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/taxai-drive%40taxai-473614.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
-
 def _read_private_file(file_url: str) -> bytes:
     # file_url from File doctype, must be private
     path = frappe.get_site_path(file_url.lstrip("/"))
