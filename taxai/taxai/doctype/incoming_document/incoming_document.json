@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_rename": 1,
  "autoname": "autoincrement",
  "creation": "2025-10-08 09:50:30.660811",
  "doctype": "DocType",
@@ -11,6 +10,7 @@
   "column_break_fmqf",
   "source",
   "file_url",
+  "document_type",
   "section_break_itch",
   "extracted_data"
  ],
@@ -54,12 +54,22 @@
    "fieldname": "extracted_data",
    "fieldtype": "JSON",
    "label": "Extracted data"
+  },
+  {
+   "default": "Unknown",
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Document type",
+   "options": "Unknown\nINVOICE\nBILL",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-08 22:33:54.514978",
+ "modified": "2025-10-09 22:45:34.074336",
  "modified_by": "Administrator",
  "module": "Taxai",
  "name": "Incoming Document",
@@ -80,7 +90,6 @@
   }
  ],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

@@ -22,16 +22,18 @@ def mine_document(incoming_document_id) -> dict:
   # Prepare form data for POST request
   with open(file_path, 'rb') as file:
     files = {'pdf': file}
-    response = requests.post('http://172.20.224.1:3000/process-pdf', files=files)
+    response = requests.post('http://docker.for.mac.localhost:3000/process-pdf', files=files)
 
   print(f"response: {response.text}")
 
   # Save response to a Document
+
   # Parse and format the JSON response
   try:
     parsed_response = json.loads(response.text)
     formatted_json = json.dumps(parsed_response, indent=2, ensure_ascii=False)
     incoming_doc.db_set("extracted_data", formatted_json)
+    incoming_doc.db_set("document_type", parsed_response.get("classifiedType", "Unknown"))
   except json.JSONDecodeError:
     # If response is not valid JSON, save as-is
     incoming_doc.db_set("extracted_data", response.text)

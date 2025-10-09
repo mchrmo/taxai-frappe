@@ -4,9 +4,22 @@ app_publisher = "Michal Chrmo"
 app_description = "TaxAI"
 app_email = "mchrmo@gmail.com"
 app_license = "mit"
+app_home = "/app/taxai"
+app_version = "0.0.1"
+app_logo_url = "/assets/taxai/globe-svgrepo-com.svg"
+
 
 # Apps
 # ------------------
+
+add_to_apps_screen = [
+	{
+		"name": app_name,
+		"logo": app_logo_url,
+		"title": app_title,
+		"route": app_home
+	}
+]
 
 # required_apps = []
 
