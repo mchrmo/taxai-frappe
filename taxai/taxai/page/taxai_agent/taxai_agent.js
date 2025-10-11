@@ -1,4 +1,4 @@
-const tables = ['tabCustomer', 'tabInvoice']
+const tables = ['tabCustomer', 'tabReceipt']
 
 
 frappe.pages['taxai-agent'].on_page_load = function (wrapper) {

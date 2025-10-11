@@ -19,6 +19,15 @@ frappe.listview_settings['Incoming Document'] = {
         }
       });
     });
-  }
+  },
+
+      formatters: {
+        document_type: function(val) {
+            if (val === "INVOICE") {
+                return "<span class='indicator-pill green'>" + __(val) + "</span>";
+            }
+        }
+    }
+
 
 }

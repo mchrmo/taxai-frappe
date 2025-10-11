@@ -34,6 +34,23 @@ def mine_document(incoming_document_id) -> dict:
     formatted_json = json.dumps(parsed_response, indent=2, ensure_ascii=False)
     incoming_doc.db_set("extracted_data", formatted_json)
     incoming_doc.db_set("document_type", parsed_response.get("classifiedType", "Unknown"))
+    print(incoming_doc.doc_name)
+    doc_data = parsed_response.get("data", {})
+    # Create documents based on type
+    if(parsed_response.get("classifiedType") == "RECEIPT"):
+      receipt_doc = frappe.get_doc({
+        "doctype": "Receipt",
+        "incoming_document": incoming_doc.name,
+        "supplier": doc_data.get("creditor", ""),
+        "total": doc_data.get("amount_total", 0),
+        "currency": doc_data.get("currency", None),
+        "date": doc_data.get("due_date", None),
+      })
+      receipt_doc.insert(ignore_permissions=True)
+      frappe.msgprint("Receipt document created successfully.", indicator="green")
+
+
+
   except json.JSONDecodeError:
     # If response is not valid JSON, save as-is
     incoming_doc.db_set("extracted_data", response.text)

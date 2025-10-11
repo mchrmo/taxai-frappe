@@ -1,12 +1,12 @@
 app_name = "taxai"
-app_title = "Taxai"
+app_title = "TaxAI"
 app_publisher = "Michal Chrmo"
 app_description = "TaxAI"
 app_email = "mchrmo@gmail.com"
 app_license = "mit"
 app_home = "/app/taxai"
 app_version = "0.0.1"
-app_logo_url = "/assets/taxai/globe-svgrepo-com.svg"
+app_logo_url = "/assets/taxai/taxai_ico.svg"
 
 
 # Apps
