@@ -7,12 +7,15 @@
  "field_order": [
   "doc_name",
   "drive_file_id",
+  "status",
   "column_break_fmqf",
   "source",
   "file_url",
   "document_type",
+  "created_document",
   "section_break_itch",
-  "extracted_data"
+  "extracted_data",
+  "classification_reasoning"
  ],
  "fields": [
   {
@@ -58,18 +61,36 @@
   {
    "default": "Unknown",
    "fieldname": "document_type",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Document type",
-   "options": "Unknown\nINVOICE\nBILL",
+   "options": "DocType",
    "read_only": 1
+  },
+  {
+   "default": "Imported",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Imported\nProcessing\nPending check\nProcessed"
+  },
+  {
+   "fieldname": "classification_reasoning",
+   "fieldtype": "Small Text",
+   "label": "Classification reasoning"
+  },
+  {
+   "fieldname": "created_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Created document",
+   "options": "document_type"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-09 22:45:34.074336",
+ "modified": "2025-10-16 16:14:44.689040",
  "modified_by": "Administrator",
  "module": "Taxai",
  "name": "Incoming Document",
@@ -92,6 +113,23 @@
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Yellow",
+   "title": "Imported"
+  },
+  {
+   "color": "Orange",
+   "title": "Processing"
+  },
+  {
+   "color": "Red",
+   "title": "Pending check"
+  },
+  {
+   "color": "Green",
+   "title": "Processed"
+  }
+ ],
  "title_field": "doc_name"
 }

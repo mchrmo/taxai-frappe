@@ -1,0 +1,188 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:transaction_id",
+ "creation": "2025-10-11 22:34:19.507407",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "type",
+  "date",
+  "bank_account",
+  "column_break_buml",
+  "amount",
+  "currency",
+  "absolute_amount",
+  "opponent_section",
+  "opponent_name",
+  "opponent_account",
+  "column_break_sotv",
+  "data_dznm",
+  "identifiers_section",
+  "vs",
+  "transaction_id",
+  "column_break_tjvo",
+  "ss",
+  "column_break_bqxx",
+  "ks",
+  "section_break_xcgu",
+  "comment",
+  "accounting_document_type",
+  "accounting_document"
+ ],
+ "fields": [
+  {
+   "fieldname": "transaction_id",
+   "fieldtype": "Data",
+   "label": "Transaction ID",
+   "unique": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "fieldname": "column_break_buml",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "opponent_section",
+   "fieldtype": "Section Break",
+   "label": "Opponent"
+  },
+  {
+   "fieldname": "opponent_name",
+   "fieldtype": "Data",
+   "label": "Opponent Name"
+  },
+  {
+   "fieldname": "opponent_account",
+   "fieldtype": "Data",
+   "label": "Opponent account"
+  },
+  {
+   "fieldname": "column_break_sotv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "data_dznm",
+   "fieldtype": "Data",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "identifiers_section",
+   "fieldtype": "Section Break",
+   "label": "Identifiers"
+  },
+  {
+   "fieldname": "vs",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "VS"
+  },
+  {
+   "fieldname": "column_break_tjvo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ss",
+   "fieldtype": "Data",
+   "label": "SS"
+  },
+  {
+   "fieldname": "column_break_bqxx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ks",
+   "fieldtype": "Data",
+   "label": "KS"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "section_break_xcgu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 5,
+   "fieldname": "comment",
+   "fieldtype": "Data",
+   "label": "Comment"
+  },
+  {
+   "fieldname": "absolute_amount",
+   "fieldtype": "Currency",
+   "hidden": 1
+  },
+  {
+   "fieldname": "accounting_document_type",
+   "fieldtype": "Link",
+   "label": "Accounting document type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "accounting_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Accounting document",
+   "options": "accounting_document_type"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-05 09:49:43.777074",
+ "modified_by": "mchrmo@gmail.com",
+ "module": "Taxai",
+ "name": "Bank Transaction",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "type"
+}

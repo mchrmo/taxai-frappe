@@ -4,7 +4,7 @@ app_publisher = "Michal Chrmo"
 app_description = "TaxAI"
 app_email = "mchrmo@gmail.com"
 app_license = "mit"
-app_home = "/app/taxai"
+app_home = "/app/dashboard"
 app_version = "0.0.1"
 app_logo_url = "/assets/taxai/taxai_ico.svg"
 

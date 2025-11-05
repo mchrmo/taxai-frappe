@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-16 15:47:03.185779",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company_name",
+  "section_break_nepp",
+  "business_id",
+  "column_break_gebv",
+  "fiskal_id",
+  "column_break_qogu",
+  "vat_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "company_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "section_break_nepp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "business_id",
+   "fieldtype": "Data",
+   "label": "Business ID"
+  },
+  {
+   "fieldname": "column_break_gebv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fiskal_id",
+   "fieldtype": "Data",
+   "label": "Fiskal ID"
+  },
+  {
+   "fieldname": "column_break_qogu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vat_id",
+   "fieldtype": "Data",
+   "label": "VAT ID"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-10-16 16:06:22.308000",
+ "modified_by": "Administrator",
+ "module": "Taxai",
+ "name": "Company",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

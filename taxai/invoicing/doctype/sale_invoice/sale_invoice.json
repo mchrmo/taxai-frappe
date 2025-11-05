@@ -1,0 +1,254 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:internal_number",
+ "creation": "2025-10-11 21:17:49.522934",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "internal_number",
+  "type",
+  "column_break_zrgj",
+  "customer",
+  "dates_section",
+  "issued_date",
+  "column_break_urhm",
+  "delivery_date",
+  "column_break_piln",
+  "due_date",
+  "due_days",
+  "customer_section",
+  "customer_address_1",
+  "customer_address_2",
+  "column_break_obsr",
+  "customer_business_id",
+  "customer_tax_id",
+  "customer_vat_id",
+  "section_break_tyvl",
+  "items",
+  "totals_and_payment",
+  "payment_method",
+  "iban",
+  "variable_symbol",
+  "payment_document_type",
+  "payment_document",
+  "column_break_bpxm",
+  "subtotal",
+  "vat",
+  "total",
+  "taxes_section",
+  "taxes"
+ ],
+ "fields": [
+  {
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer name",
+   "options": "Partner"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "customer_section",
+   "fieldtype": "Section Break",
+   "label": "Customer details",
+   "placeholder": "Test"
+  },
+  {
+   "fieldname": "customer_address_1",
+   "fieldtype": "Data",
+   "label": "Address Line 1"
+  },
+  {
+   "fieldname": "customer_address_2",
+   "fieldtype": "Data",
+   "label": "Address Line 2"
+  },
+  {
+   "fieldname": "column_break_obsr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_business_id",
+   "fieldtype": "Data",
+   "label": "Business ID"
+  },
+  {
+   "fieldname": "customer_tax_id",
+   "fieldtype": "Data",
+   "label": "Tax ID"
+  },
+  {
+   "fieldname": "customer_vat_id",
+   "fieldtype": "Data",
+   "label": "VAT ID"
+  },
+  {
+   "fieldname": "column_break_zrgj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_tyvl",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Invoice Item"
+  },
+  {
+   "depends_on": "eval:doc.payment_method==\"Bank Transfer\"",
+   "fieldname": "iban",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "mandatory_depends_on": "eval:doc.payment_method==\"Bank Transfer\"",
+   "options": "Bank Account",
+   "placeholder": "SK3375000000004020413257"
+  },
+  {
+   "fieldname": "column_break_bpxm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "vat",
+   "fieldtype": "Currency",
+   "label": "VAT",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "totals_and_payment",
+   "fieldtype": "Section Break",
+   "label": "Totals & Payment"
+  },
+  {
+   "default": "Bank Transfer",
+   "fieldname": "payment_method",
+   "fieldtype": "Select",
+   "label": "Payment method",
+   "options": "Cash\nBank Transfer"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "taxes_section",
+   "fieldtype": "Section Break",
+   "label": "Taxes"
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "options": "Invoice Tax",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dates_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "issued_date",
+   "fieldtype": "Date",
+   "label": "Issued",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_urhm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "label": "Delivery"
+  },
+  {
+   "fieldname": "column_break_piln",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due"
+  },
+  {
+   "default": "14",
+   "fieldname": "due_days",
+   "fieldtype": "Int",
+   "label": "Due days"
+  },
+  {
+   "fieldname": "payment_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Payment Document",
+   "options": "payment_document_type"
+  },
+  {
+   "fieldname": "payment_document_type",
+   "fieldtype": "Link",
+   "label": "Payment document type",
+   "link_filters": "[[\"DocType\",\"module\",\"=\",\"Taxai\"]]",
+   "options": "DocType"
+  },
+  {
+   "default": "FA-0001",
+   "fieldname": "internal_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Number",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "variable_symbol",
+   "fieldtype": "Data",
+   "label": "Variable symbol"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-04 19:32:46.347028",
+ "modified_by": "mchrmo@gmail.com",
+ "module": "Invoicing",
+ "name": "Sale Invoice",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "internal_number"
+}

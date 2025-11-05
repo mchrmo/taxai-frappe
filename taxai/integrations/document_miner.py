@@ -7,10 +7,8 @@ import json
 
 
 @frappe.whitelist()
-def mine_document(incoming_document_id) -> dict:
-  # incoming_document_id = 4
-  # Get the Incoming Document
-  incoming_doc = frappe.get_doc("Incoming Document", incoming_document_id)
+def mine_document(incoming_doc) -> dict:
+
   
   # Get the attachment file path
   if not incoming_doc.file_url:
@@ -19,43 +17,23 @@ def mine_document(incoming_document_id) -> dict:
   file_path = frappe.get_site_path() + incoming_doc.file_url
   
   print(f"Processing file at: {file_path}")
+  
   # Prepare form data for POST request
   with open(file_path, 'rb') as file:
     files = {'pdf': file}
-    response = requests.post('http://docker.for.mac.localhost:3000/process-pdf', files=files)
+    miner_url = frappe.get_site_config().backup["miner_url"]
+    print(f"Miner URL: {miner_url}")
+    response = requests.post(f'{miner_url}/process-pdf', files=files)
 
-  print(f"response: {response.text}")
 
   # Save response to a Document
-
-  # Parse and format the JSON response
   try:
     parsed_response = json.loads(response.text)
-    formatted_json = json.dumps(parsed_response, indent=2, ensure_ascii=False)
-    incoming_doc.db_set("extracted_data", formatted_json)
-    incoming_doc.db_set("document_type", parsed_response.get("classifiedType", "Unknown"))
-    print(incoming_doc.doc_name)
-    doc_data = parsed_response.get("data", {})
-    # Create documents based on type
-    if(parsed_response.get("classifiedType") == "RECEIPT"):
-      receipt_doc = frappe.get_doc({
-        "doctype": "Receipt",
-        "incoming_document": incoming_doc.name,
-        "supplier": doc_data.get("creditor", ""),
-        "total": doc_data.get("amount_total", 0),
-        "currency": doc_data.get("currency", None),
-        "date": doc_data.get("due_date", None),
-      })
-      receipt_doc.insert(ignore_permissions=True)
-      frappe.msgprint("Receipt document created successfully.", indicator="green")
-
-
+    response = parsed_response
 
   except json.JSONDecodeError:
-    # If response is not valid JSON, save as-is
-    incoming_doc.db_set("extracted_data", response.text)
+    response = {"status": 0,"message": "Invalid JSON response from miner service"}
 
-  file_path = incoming_doc.file_url
 
-  # Placeholder implementation
-  return {"status": "Document mined successfully", "file_path": file_path}
+  return response
+ 

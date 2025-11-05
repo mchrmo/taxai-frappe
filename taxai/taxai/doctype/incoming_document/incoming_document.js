@@ -7,18 +7,15 @@ frappe.ui.form.on("Incoming Document", {
 		frm.add_custom_button(__('Mine Document'), function () {
 
 			frappe.call({
-				method: "taxai.integrations.document_miner.mine_document",
-				args: {
-					incoming_document_id: frm.doc.name
-				},
-				freeze: true,
-				callback: function (response) {
-					if (response.message) {
-						frappe.show_alert(__('Document mined successfully'));
-						frm.reload_doc();
-					}
-				}
-			});
+        method: "taxai.taxai.doctype.incoming_document.incoming_document.startExtraction",
+        args: {
+          document_name: frm.doc.name
+        },
+        freeze: false,
+        callback: function (response) {
+          frappe.show_alert(__('Document is being processed'), 5);
+        }
+      });
 		});
 	},
 });

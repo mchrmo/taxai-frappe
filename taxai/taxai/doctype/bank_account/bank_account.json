@@ -1,0 +1,102 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:iban",
+ "creation": "2025-10-11 22:06:05.947685",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "doc_name",
+  "section_break_mrhp",
+  "iban",
+  "allow_integration",
+  "integrations_section",
+  "column_break_ptgy",
+  "bank",
+  "column_break_afbe",
+  "access_token"
+ ],
+ "fields": [
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "IBAN",
+   "unique": 1
+  },
+  {
+   "default": "Fio Banka SK",
+   "depends_on": "eval: doc.allow_integration==true",
+   "fieldname": "bank",
+   "fieldtype": "Select",
+   "label": "Bank",
+   "options": "Fio Banka SK"
+  },
+  {
+   "depends_on": "eval: doc.bank==\"Fio Banka SK\" && doc.allow_integration==true;",
+   "fieldname": "access_token",
+   "fieldtype": "Data",
+   "label": "Access Token"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_integration",
+   "fieldtype": "Check",
+   "label": "Allow integration"
+  },
+  {
+   "fieldname": "doc_name",
+   "fieldtype": "Data",
+   "label": "Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_mrhp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ptgy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "integrations_section",
+   "fieldtype": "Section Break",
+   "label": "Integrations"
+  },
+  {
+   "fieldname": "column_break_afbe",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-04 17:53:13.031915",
+ "modified_by": "mchrmo@gmail.com",
+ "module": "Taxai",
+ "name": "Bank Account",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "doc_name"
+}
