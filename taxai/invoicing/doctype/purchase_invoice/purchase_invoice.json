@@ -17,12 +17,12 @@
   "column_break_piln",
   "due_date",
   "supplier_section",
-  "customer_address_1",
-  "customer_address_2",
+  "supplier_address_1",
+  "supplier_address_2",
   "column_break_obsr",
-  "customer_business_id",
-  "customer_tax_id",
-  "customer_vat_id",
+  "supplier_business_id",
+  "supplier_tax_id",
+  "supplier_vat_id",
   "section_break_tyvl",
   "items",
   "totals_and_payment",
@@ -39,33 +39,8 @@
  ],
  "fields": [
   {
-   "fieldname": "customer_address_1",
-   "fieldtype": "Data",
-   "label": "Address Line 1"
-  },
-  {
-   "fieldname": "customer_address_2",
-   "fieldtype": "Data",
-   "label": "Address Line 2"
-  },
-  {
    "fieldname": "column_break_obsr",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "customer_business_id",
-   "fieldtype": "Data",
-   "label": "Business ID"
-  },
-  {
-   "fieldname": "customer_tax_id",
-   "fieldtype": "Data",
-   "label": "Tax ID"
-  },
-  {
-   "fieldname": "customer_vat_id",
-   "fieldtype": "Data",
-   "label": "VAT ID"
   },
   {
    "fieldname": "column_break_zrgj",
@@ -202,12 +177,37 @@
    "fieldtype": "Link",
    "label": "Supplier name",
    "options": "Partner"
+  },
+  {
+   "fieldname": "supplier_address_1",
+   "fieldtype": "Data",
+   "label": "Address Line 1"
+  },
+  {
+   "fieldname": "supplier_address_2",
+   "fieldtype": "Data",
+   "label": "Address Line 2"
+  },
+  {
+   "fieldname": "supplier_business_id",
+   "fieldtype": "Data",
+   "label": "Business ID"
+  },
+  {
+   "fieldname": "supplier_tax_id",
+   "fieldtype": "Data",
+   "label": "Tax ID"
+  },
+  {
+   "fieldname": "supplier_vat_id",
+   "fieldtype": "Data",
+   "label": "VAT ID"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-16 19:19:38.689663",
+ "modified": "2025-11-10 16:17:37.658011",
  "modified_by": "Administrator",
  "module": "Invoicing",
  "name": "Purchase Invoice",

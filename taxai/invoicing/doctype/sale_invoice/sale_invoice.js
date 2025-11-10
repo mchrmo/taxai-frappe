@@ -61,6 +61,32 @@ frappe.ui.form.on("Sale Invoice", {
 
     frm.add_custom_button('Change number', () => change_number_dialog.show());
 
+    // Add pairing functionality
+    if (!frm.is_new()) {
+      // Add button to pair with bank transaction
+      frm.add_custom_button('Pair with Bank Transaction', () => {
+        pair_with_bank_transaction(frm);
+      }, 'Payment');
+
+      // Add button to find pairing candidates
+      frm.add_custom_button('Find Payment Candidates', () => {
+        find_payment_candidates(frm);
+      }, 'Payment');
+
+      // Add button to unpair if already paired
+      if (frm.doc.payment_document) {
+        frm.add_custom_button('Unpair Payment', () => {
+          unpair_payment_document(frm);
+        }, 'Payment');
+      }
+
+      // Show payment status indicator
+      if (frm.doc.payment_document) {
+        frm.page.set_indicator(__('Paid'), 'green');
+      } else {
+        frm.page.set_indicator(__('Unpaid'), 'orange');
+      }
+    }
 
     frm.page.add_action_item('Duplicate', () => {
       frappe.new_doc('Sale Invoice', { type: frm.doc.type, customer: frm.doc.customer, items: frm.doc.items });
@@ -242,7 +268,6 @@ async function setInvoiceNumber(frm, number) {
 // Others
 
 function setCustomer(frm) {
-  console.log(frm.doc);
 
   if (frm.doc.customer) {
     frappe.db.get_doc('Partner', frm.doc.customer).then(customer => {
@@ -275,4 +300,131 @@ function setCustomer(frm) {
 async function get_new_number(frm) {
   const res = await frappe.call("taxai.utils.get_next_naming_series_number", { naming_series: "Sale Invoice" })
   frm.set_value("internal_number", res.message);
+}
+
+// Payment pairing functions
+function pair_with_bank_transaction(frm) {
+  frappe.call({
+    method: 'taxai.services.pairing_api.pair_invoice_with_transaction',
+    args: {
+      invoice_name: frm.doc.name,
+      invoice_type: 'Sale Invoice'
+    },
+    callback: function(r) {
+      if (r.message.success) {
+        frappe.show_alert({
+          message: r.message.message,
+          indicator: 'green'
+        });
+        frm.reload_doc();
+      } else {
+        frappe.msgprint({
+          title: __('Pairing Failed'),
+          message: r.message.message,
+          indicator: 'red'
+        });
+      }
+    }
+  });
+}
+
+function find_payment_candidates(frm) {
+  frappe.call({
+    method: 'taxai.services.pairing_api.get_pairing_candidates',
+    args: {
+      document_type: 'Sale Invoice',
+      document_name: frm.doc.name
+    },
+    callback: function(r) {
+      if (r.message && r.message.length > 0) {
+        show_pairing_candidates_dialog(frm, r.message);
+      } else {
+        frappe.msgprint({
+          title: __('No Candidates Found'),
+          message: __('No matching bank transactions found for this invoice.'),
+          indicator: 'yellow'
+        });
+      }
+    }
+  });
+}
+
+function show_pairing_candidates_dialog(frm, candidates) {
+  let fields = [
+    {
+      label: 'Select Bank Transaction',
+      fieldname: 'bank_transaction',
+      fieldtype: 'Select',
+      options: candidates.map(c => ({
+        label: `${c.name} - ${c.date} - ${c.opponent_name} - €${c.amount}${c.accounting_document ? ' (Already paired)' : ''}`,
+        value: c.name
+      }))
+    }
+  ];
+
+  let dialog = new frappe.ui.Dialog({
+    title: 'Select Bank Transaction to Pair',
+    fields: fields,
+    primary_action_label: 'Pair',
+    primary_action(values) {
+      if (values.bank_transaction) {
+        // Manual pairing via API (bypasses condition checks)
+        frappe.call({
+          method: 'taxai.services.pairing_api.manual_pair_invoice_with_transaction',
+          args: {
+            invoice_name: frm.doc.name,
+            invoice_type: 'Sale Invoice',
+            bank_transaction_name: values.bank_transaction
+          },
+          callback: function(r) {
+            if (r.message.success) {
+              frappe.show_alert({
+                message: r.message.message,
+                indicator: 'green'
+              });
+              frm.reload_doc();
+            } else {
+              frappe.msgprint({
+                title: __('Pairing Failed'),
+                message: r.message.message,
+                indicator: 'red'
+              });
+            }
+          }
+        });
+        dialog.hide();
+      }
+    }
+  });
+
+  dialog.show();
+}
+
+function unpair_payment_document(frm) {
+  frappe.confirm(
+    __('Are you sure you want to unpair this invoice from its payment document?'),
+    () => {
+      frappe.call({
+        method: 'taxai.services.pairing_api.unpair_invoice_and_transaction',
+        args: {
+          sale_invoice_name: frm.doc.name
+        },
+        callback: function(r) {
+          if (r.message.success) {
+            frappe.show_alert({
+              message: r.message.message,
+              indicator: 'green'
+            });
+            frm.reload_doc();
+          } else {
+            frappe.msgprint({
+              title: __('Unpairing Failed'),
+              message: r.message.message,
+              indicator: 'red'
+            });
+          }
+        }
+      });
+    }
+  );
 }

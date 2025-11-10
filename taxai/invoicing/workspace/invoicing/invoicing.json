@@ -1,7 +1,7 @@
 {
  "app": "taxai",
  "charts": [],
- "content": "[{\"id\":\"n1X30QXWF5\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Invoicing</span>\",\"col\":12}}]",
+ "content": "[{\"id\":\"ZaL2VWvJtR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sale Invoice\",\"col\":3}},{\"id\":\"0HmnEImLTT\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Invoice\",\"col\":3}}]",
  "creation": "2025-10-10 08:08:33.043951",
  "custom_blocks": [],
  "docstatus": 0,
@@ -15,7 +15,7 @@
  "label": "Invoicing",
  "link_type": "DocType",
  "links": [],
- "modified": "2025-10-15 21:59:15.268616",
+ "modified": "2025-11-10 17:46:28.487902",
  "modified_by": "Administrator",
  "module": "Invoicing",
  "name": "Invoicing",
@@ -26,7 +26,24 @@
  "quick_lists": [],
  "roles": [],
  "sequence_id": 3.0,
- "shortcuts": [],
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Sale Invoice",
+   "link_to": "Sale Invoice",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "Purchase Invoice",
+   "link_to": "Purchase Invoice",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
  "title": "Invoicing",
  "type": "Workspace"
 }
