@@ -53,15 +53,16 @@ frappe.ui.form.on("Purchase Invoice", {
 });
 
 frappe.ui.form.on('Invoice Item', {
+
   qty(frm, cdt, cdn) {
     calculateTotal(frm);
   },
   unit_price(frm, cdt, cdn) {
     calculateTotal(frm);
   },
-  unit_price_w_vat(frm, cdt, cdn) {
+  unit_price_with_vat(frm, cdt, cdn) {
     let row = locals[cdt][cdn];
-    row.unit_price = row.unit_price_w_vat / (1 + (row.vat_rate / 100));
+    row.unit_price = row.unit_price_with_vat / (1 + (row.vat_rate / 100));
 
     frm.refresh_field('items');
     calculateTotal(frm);
@@ -126,24 +127,24 @@ function calculateTax(frm) {
 function calculateTotal(frm) {
 
   frm.doc.items.forEach(item => {
-    item.unit_price_w_vat = item.unit_price + item.unit_price * (item.vat_rate / 100);
-    item.total = item.qty * item.unit_price;
-    item.vat = item.total * (item.vat_rate / 100);
-    item.total_w_vat = item.total + item.vat;
+    item.unit_price_with_vat = item.unit_price + item.unit_price * (item.vat_rate / 100);
+    item.total = item.quantity * item.unit_price;
+    item.vat_amount = item.total * (item.vat_rate / 100);
+    item.total_with_vat = item.total + item.vat;
   });
 
   frm.refresh_field('items');
 
 
   let subtotal = 0;
-  let total_w_vat = 0;
+  let total_with_vat = 0;
   frm.doc.items.forEach(item => {
     subtotal += item.total;
-    total_w_vat += item.total_w_vat;
+    total_with_vat += item.total_with_vat;
   });
 
   frm.set_value('subtotal', subtotal);
-  frm.set_value('total', total_w_vat);
+  frm.set_value('total', total_with_vat);
 
   calculateTax(frm);
 

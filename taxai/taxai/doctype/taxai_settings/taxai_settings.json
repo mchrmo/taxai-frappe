@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-12 12:01:16.476938",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "backend_url",
+  "allow_doc_creation"
+ ],
+ "fields": [
+  {
+   "fieldname": "backend_url",
+   "fieldtype": "Data",
+   "label": "Backend URL"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_doc_creation",
+   "fieldtype": "Check",
+   "label": "Allow creating documents from extracted documents "
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-11-12 21:34:36.703540",
+ "modified_by": "Administrator",
+ "module": "Taxai",
+ "name": "Taxai Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

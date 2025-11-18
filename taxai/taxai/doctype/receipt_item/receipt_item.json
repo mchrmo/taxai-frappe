@@ -39,19 +39,21 @@
    "fieldname": "unit_price",
    "fieldtype": "Currency",
    "label": "Unit price",
+   "options": "currency",
    "precision": "4"
   },
   {
    "fieldname": "total",
    "fieldtype": "Currency",
-   "label": "Total"
+   "label": "Total",
+   "options": "currency"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-13 22:40:31.453708",
+ "modified": "2025-11-18 11:29:56.999334",
  "modified_by": "Administrator",
  "module": "Taxai",
  "name": "Receipt Item",

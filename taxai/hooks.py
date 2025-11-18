@@ -21,6 +21,16 @@ add_to_apps_screen = [
 	}
 ]
 
+doc_events = {
+    "Communication": {
+        "after_insert": "taxai.integrations.email_sync.handle_email_communication"
+    }
+}
+
+
+app_include_js = ["assets/taxai/js/custom_desk.js"]
+
+
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page

@@ -1,0 +1,6 @@
+
+
+
+frappe.after_ajax(() => {
+  
+});

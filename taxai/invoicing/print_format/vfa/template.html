@@ -90,7 +90,7 @@
                 <td class="text-end text-nowrap">{{frappe.format(item.unit_price, {'fieldtype': 'Currency'})}}</td>
                 <td class="text-end text-nowrap">{{frappe.format(item.vat_rate, {'fieldtype': 'Percentage'})}} %</td>
                 <td class="text-end text-nowrap">{{frappe.format(item.total, {'fieldtype': 'Currency'})}}</td>
-                <td class="text-end text-nowrap">{{frappe.format(item.total_w_vat, {'fieldtype': 'Currency'})}}</td>
+                <td class="text-end text-nowrap">{{frappe.format(item.total_with_vat, {'fieldtype': 'Currency'})}}</td>
               </tr>
             {% endfor %}
         </tbody>

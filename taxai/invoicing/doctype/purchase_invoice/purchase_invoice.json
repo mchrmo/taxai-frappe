@@ -10,6 +10,7 @@
   "external_number",
   "column_break_zrgj",
   "supplier",
+  "currency",
   "dates_section",
   "issued_date",
   "column_break_urhm",
@@ -27,6 +28,7 @@
   "items",
   "totals_and_payment",
   "payment_method",
+  "variable_symbol",
   "iban",
   "payment_document_type",
   "payment_document",
@@ -35,7 +37,8 @@
   "vat",
   "total",
   "taxes_section",
-  "taxes"
+  "taxes",
+  "payment_tab"
  ],
  "fields": [
   {
@@ -71,6 +74,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Subtotal",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -78,6 +82,7 @@
    "fieldname": "vat",
    "fieldtype": "Currency",
    "label": "VAT",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -85,6 +90,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -202,12 +208,30 @@
    "fieldname": "supplier_vat_id",
    "fieldtype": "Data",
    "label": "VAT ID"
+  },
+  {
+   "fieldname": "variable_symbol",
+   "fieldtype": "Data",
+   "label": "Variable symbol"
+  },
+  {
+   "default": "EUR",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment_tab",
+   "fieldtype": "Tab Break",
+   "label": "Payment"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-10 16:17:37.658011",
+ "modified": "2025-11-18 08:18:29.928871",
  "modified_by": "Administrator",
  "module": "Invoicing",
  "name": "Purchase Invoice",

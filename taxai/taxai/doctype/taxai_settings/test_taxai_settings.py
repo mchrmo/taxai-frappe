@@ -13,9 +13,9 @@ IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 
 
 
-class IntegrationTestCashReceipts(IntegrationTestCase):
+class IntegrationTestTaxaiSettings(IntegrationTestCase):
 	"""
-	Integration tests for CashReceipts.
+	Integration tests for TaxaiSettings.
 	Use this class for testing interactions between multiple components.
 	"""
 

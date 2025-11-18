@@ -5,11 +5,23 @@ import frappe
 from frappe.model.document import Document
 
 
-class CashReceipts(Document):
+class CashReceipt(Document):
   
   def after_insert(self):
     series = frappe.get_doc("Naming Series", self.doctype)  
     series.increment_series()
+    
+  def on_trash(self):
+    
+    # Unpair Incoming Document if linked
+    try:
+      document = frappe.get_doc("Incoming Document", {"created_document": self.name})
+      if document:
+        document.created_document = None
+        document.save()
+    except frappe.DoesNotExistError:
+      pass
+  
     
   def pair_payment(self):
       bank_transactions = frappe.db.get_list(
@@ -27,14 +39,14 @@ class CashReceipts(Document):
       self.bank_payment = transaction.name
       self.save()
 
-      transaction.pair_accounting_document("CashReceipts", self.name)
+      transaction.pair_accounting_document("CashReceipt", self.name)
       
       print("Paired with bank transaction", self.bank_payment)  
       return {"status": "success", "bank_transaction": self.bank_payment}
     
     
 @frappe.whitelist()
-def pair_payment(cash_receipts_name):
-  cash_receipts = frappe.get_doc("CashReceipts", cash_receipts_name)
-  res = cash_receipts.pair_payment()
+def pair_payment(cash_receipt_name):
+  cash_receipt = frappe.get_doc("CashReceipt", cash_receipt_name)
+  res = cash_receipt.pair_payment()
   return res

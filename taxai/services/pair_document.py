@@ -98,7 +98,7 @@ def pair_purchase_invoice_with_bank_transaction(purchase_invoice_name):
     """
     Pair purchase invoice with bank transaction using external_number as variable symbol.
     """
-    return pair_invoice_with_bank_transaction("Purchase Invoice", purchase_invoice_name, "external_number")
+    return pair_invoice_with_bank_transaction("Purchase Invoice", purchase_invoice_name, "variable_symbol")
 
 
 def auto_pair_all_unpaired_documents():

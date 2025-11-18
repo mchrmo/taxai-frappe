@@ -15,7 +15,8 @@
   "created_document",
   "section_break_itch",
   "extracted_data",
-  "classification_reasoning"
+  "classification_reasoning",
+  "note"
  ],
  "fields": [
   {
@@ -25,7 +26,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Source",
-   "options": "Google Drive\nManual"
+   "options": "Google Drive\nManual\nEmail"
   },
   {
    "fieldname": "drive_file_id",
@@ -59,21 +60,19 @@
    "label": "Extracted data"
   },
   {
-   "default": "Unknown",
    "fieldname": "document_type",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Document type",
-   "options": "DocType",
-   "read_only": 1
+   "options": "DocType"
   },
   {
    "default": "Imported",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Imported\nProcessing\nPending check\nProcessed"
+   "options": "Imported\nProcessing\nExtracte\nPending check\nProcessed"
   },
   {
    "fieldname": "classification_reasoning",
@@ -84,13 +83,19 @@
    "fieldname": "created_document",
    "fieldtype": "Dynamic Link",
    "label": "Created document",
-   "options": "document_type"
+   "options": "document_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-16 16:14:44.689040",
+ "modified": "2025-11-18 11:33:08.626418",
  "modified_by": "Administrator",
  "module": "Taxai",
  "name": "Incoming Document",

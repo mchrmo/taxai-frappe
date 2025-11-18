@@ -12,15 +12,18 @@
   "supplier",
   "date",
   "place",
+  "uid",
   "items_section",
-  "table_ewtl",
+  "items",
   "totals_section",
-  "total",
-  "rounding",
-  "column_break_scyw",
   "currency",
   "payment_method",
   "bank_payment",
+  "column_break_scyw",
+  "subtotal",
+  "vat_amount",
+  "total",
+  "rounding",
   "attachments_tab",
   "incoming_document",
   "raw_data"
@@ -34,7 +37,9 @@
   {
    "fieldname": "total",
    "fieldtype": "Currency",
-   "label": "Total"
+   "label": "Total",
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "currency",
@@ -82,16 +87,12 @@
    "label": "Items"
   },
   {
-   "fieldname": "table_ewtl",
-   "fieldtype": "Table",
-   "options": "Receipt Item"
-  },
-  {
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
    "label": "Totals"
   },
   {
+   "depends_on": "eval:doc.payment_method==\"Cash\"",
    "fieldname": "rounding",
    "fieldtype": "Currency",
    "label": "Rounding"
@@ -122,15 +123,39 @@
    "fieldtype": "Link",
    "label": "Bank payment",
    "options": "Bank Transaction"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Receipt Item"
+  },
+  {
+   "fieldname": "uid",
+   "fieldtype": "Data",
+   "label": "UID"
+  },
+  {
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "label": "Subtotal",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vat_amount",
+   "fieldtype": "Currency",
+   "label": "VAT",
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-13 23:11:03.947013",
+ "modified": "2025-11-18 11:36:11.576025",
  "modified_by": "Administrator",
  "module": "Taxai",
- "name": "Cash Receipts",
+ "name": "Cash Receipt",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [

@@ -21,8 +21,7 @@ def _sa_creds():
         frappe.throw("Upload Service Account JSON in Google Drive SA Settings.")
     sa_bytes = _read_private_file(s.sa_json_file)
     info = json.loads(sa_bytes.decode("utf-8"))
-    scopes = SCOPES
-    return Credentials.from_service_account_info(info, scopes=scopes)
+    return Credentials.from_service_account_info(info, scopes=SCOPES)
 
 def drive_service():
     return build("drive", "v3", credentials=_sa_creds(), cache_discovery=False)

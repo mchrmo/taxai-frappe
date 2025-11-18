@@ -157,7 +157,7 @@ def get_pairing_candidates(document_type, document_name):
         doc = frappe.get_doc("Purchase Invoice", document_name)
         if not doc.external_number or not doc.total:
             return []
-        variable_symbol = doc.external_number
+        variable_symbol = doc.variable_symbol
         
     else:
         frappe.throw(_("Pairing candidates only available for Sale Invoice or Purchase Invoice"))
