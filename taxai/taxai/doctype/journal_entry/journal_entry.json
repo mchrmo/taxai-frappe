@@ -1,0 +1,119 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ENTRY-{#####}",
+ "creation": "2025-12-03 19:57:49.842119",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "entry_date",
+  "time_of_supply",
+  "amount",
+  "column_break_jfwa",
+  "description",
+  "source",
+  "document",
+  "section_break_ctrr",
+  "account_debit",
+  "column_break_sadv",
+  "account_credit"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "column_break_jfwa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description"
+  },
+  {
+   "description": "MD",
+   "fieldname": "account_debit",
+   "fieldtype": "Link",
+   "label": "Account Debit",
+   "options": "Account"
+  },
+  {
+   "description": "DAL",
+   "fieldname": "account_credit",
+   "fieldtype": "Link",
+   "label": "Account Credit",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "default": "Today",
+   "fieldname": "entry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Entry date"
+  },
+  {
+   "default": "Today",
+   "fieldname": "time_of_supply",
+   "fieldtype": "Date",
+   "label": "Time of supply"
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Source",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"Purchase Invoice\",\"Sale Invoice\",\"Cash Receipt\",\"Cash Payment\"]]]",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "section_break_ctrr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_sadv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "document",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Document",
+   "options": "source"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-06 20:02:11.846838",
+ "modified_by": "Administrator",
+ "module": "Taxai",
+ "name": "Journal Entry",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

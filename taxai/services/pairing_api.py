@@ -42,7 +42,7 @@ def pair_invoice_with_transaction(invoice_name, invoice_type="Sale Invoice"):
 def manual_pair_invoice_with_transaction(invoice_name, invoice_type, bank_transaction_name):
     """
     API method to manually pair an invoice with a specific bank transaction
-    Bypasses automatic condition checks - for manual user selection only
+    Adds a payment record to the invoice
     
     Args:
         invoice_name (str): Name of the Invoice
@@ -52,34 +52,15 @@ def manual_pair_invoice_with_transaction(invoice_name, invoice_type, bank_transa
     Returns:
         dict: Pairing result
     """
-    # if not frappe.has_permission(invoice_type, "write", invoice_name):
-    #     frappe.throw(_(f"Not permitted to modify this {invoice_type}"))
+    if not frappe.has_permission(invoice_type, "write", invoice_name):
+        frappe.throw(_(f"Not permitted to modify this {invoice_type}"))
         
     if not frappe.has_permission("Bank Transaction", "write", bank_transaction_name):
         frappe.throw(_("Not permitted to modify this Bank Transaction"))
     
     try:
-        # Get the invoice and bank transaction
-        invoice = frappe.get_doc(invoice_type, invoice_name)
-        bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
-        
-        # Update invoice with payment document reference
-        invoice.payment_document_type = "Bank Transaction"
-        invoice.payment_document = bank_transaction_name
-        invoice.save()
-        
-        # Update bank transaction with accounting document reference
-        bank_transaction.accounting_document_type = invoice_type
-        bank_transaction.accounting_document = invoice_name
-        bank_transaction.save()
-        
-        return {
-            "success": True,
-            "message": f"Successfully paired {invoice_type} {invoice_name} with Bank Transaction {bank_transaction_name}",
-            "invoice_type": invoice_type,
-            "invoice_name": invoice_name,
-            "bank_transaction": bank_transaction_name
-        }
+        from taxai.services.pair_document import manual_pair_invoice_with_transaction
+        return manual_pair_invoice_with_transaction(invoice_type, invoice_name, bank_transaction_name)
         
     except Exception as e:
         frappe.log_error(f"Error manually pairing {invoice_type} {invoice_name} with {bank_transaction_name}: {str(e)}")
@@ -110,6 +91,7 @@ def auto_pair_documents():
 def unpair_invoice_and_transaction(sale_invoice_name=None, purchase_invoice_name=None, bank_transaction_name=None):
     """
     API method to unpair documents
+    Removes payment record from invoice and clears bank transaction reference
     
     Args:
         sale_invoice_name (str, optional): Name of Sale Invoice
@@ -183,7 +165,75 @@ def get_pairing_candidates(document_type, document_name):
         fields=["name", "date", "amount", "opponent_name", "accounting_document"]
     )
 
+
+@frappe.whitelist()
+def get_unpaired_invoices_for_transaction(doctype, txt, searchfield, start, page_len, filters):
+    """
+    Get list of unpaired invoices for pairing with a bank transaction.
+    Used as a query method for Link field in Bank Transaction form.
     
+    Args:
+        doctype (str): The invoice doctype to search
+        txt (str): Search text entered by user
+        searchfield (str): Field to search on
+        start (int): Pagination start
+        page_len (int): Page length
+        filters (dict): Additional filters including invoice_type and transaction_amount
+        
+    Returns:
+        list: List of tuples with invoice names and display values
+    """
+    invoice_type = filters.get("invoice_type", "Sale Invoice")
+    transaction_amount = filters.get("transaction_amount", 0)
+    
+    # Base conditions
+    conditions = []
+    values = {"txt": f"%{txt}%"}
+    
+    if invoice_type == "Sale Invoice":
+        conditions.append("variable_symbol LIKE %(txt)s OR customer LIKE %(txt)s OR internal_number LIKE %(txt)s")
+        name_field = "internal_number"
+        partner_field = "customer"
+    else:  # Purchase Invoice
+        conditions.append("external_number LIKE %(txt)s OR supplier LIKE %(txt)s OR internal_number LIKE %(txt)s")
+        name_field = "internal_number"
+        partner_field = "supplier"
+    
+    # Filter to show invoices with unpaid amount
+    conditions.append("(unpaid_amount IS NULL OR unpaid_amount > 0)")
+    
+    where_clause = " AND ".join(conditions)
+    
+    query = f"""
+        SELECT 
+            name,
+            {name_field} as invoice_number,
+            {partner_field} as partner,
+            total,
+            unpaid_amount,
+            issued_date
+        FROM `tab{invoice_type}`
+        WHERE {where_clause}
+        ORDER BY 
+            CASE WHEN ABS(total - %(transaction_amount)s) < 0.01 THEN 0 ELSE 1 END,
+            issued_date DESC
+        LIMIT %(start)s, %(page_len)s
+    """
+    
+    values["transaction_amount"] = transaction_amount
+    values["start"] = start
+    values["page_len"] = page_len
+    
+    results = frappe.db.sql(query, values, as_dict=True)
+    
+    # Format results as required by Link field query
+    return [
+        (
+            r.name,
+            f"{r.invoice_number} - {r.partner} - {frappe.format(r.total, {'fieldtype': 'Currency'})} - Unpaid: {frappe.format(r.unpaid_amount or r.total, {'fieldtype': 'Currency'})}"
+        )
+        for r in results
+    ]
 
 
 @frappe.whitelist()
@@ -197,22 +247,26 @@ def get_unpaired_documents_summary():
     unpaired_sale_invoices = frappe.get_all(
         "Sale Invoice",
         filters={
-            "payment_document": ["is", "not set"],
             "variable_symbol": ["!=", ""],
             "total": [">", 0]
         },
-        fields=["name", "variable_symbol", "total", "issued_date", "customer"]
+        fields=["name", "variable_symbol", "total", "issued_date", "customer", "unpaid_amount"]
     )
+    
+    # Filter to only include invoices with unpaid amounts
+    unpaired_sale_invoices = [inv for inv in unpaired_sale_invoices if inv.get("unpaid_amount", inv["total"]) > 0]
     
     unpaired_purchase_invoices = frappe.get_all(
         "Purchase Invoice",
         filters={
-            "payment_document": ["is", "not set"],
             "external_number": ["!=", ""],
             "total": [">", 0]
         },
-        fields=["name", "external_number", "total", "issued_date", "supplier"]
+        fields=["name", "external_number", "total", "issued_date", "supplier", "unpaid_amount"]
     )
+    
+    # Filter to only include invoices with unpaid amounts
+    unpaired_purchase_invoices = [inv for inv in unpaired_purchase_invoices if inv.get("unpaid_amount", inv["total"]) > 0]
     
     unpaired_transactions = frappe.get_all(
         "Bank Transaction",

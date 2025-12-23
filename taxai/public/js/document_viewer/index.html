@@ -1,0 +1,684 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="/assets/taxai/js/document_viewer/output.css" rel="stylesheet">
+  <style>
+    /* Custom scrollbar styling */
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Ensure proper sizing within Frappe form */
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Prevent field overflow */
+    input,
+    select,
+    textarea {
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Ensure flex containers don't overflow */
+    .flex {
+      min-width: 0;
+    }
+
+    /* Ensure grid items don't overflow */
+    .grid>* {
+      min-width: 0;
+    }
+  </style>
+
+</head>
+
+<div style="height: 80vh;" class=" overflow-auto bg-gray-50">
+  <div class="flex flex-col">
+
+    <!-- Top Bar with Action Buttons -->
+    <!-- <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-white to-blue-50 border-b border-blue-100 shadow-md backdrop-blur-sm">
+      <h2 class="text-xl font-medium bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Extracted Data</h2>
+        <div class="flex gap-3">
+          <button id="cancelChangesBtn" 
+                  onclick="cancelChanges()" 
+                  disabled
+                  class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 shadow-sm hover:shadow">
+            Cancel Changes
+          </button>
+          <button id="saveBtn" 
+                  onclick="saveData()" 
+                  class="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 cursor-pointer transition-all duration-200 shadow-lg hover:shadow-xl">
+            Save
+          </button>
+        </div>
+      </div> -->
+
+    <!-- Main Content Area -->
+    <div class="flex flex-1 overflow-hidden">
+
+      <!-- LEFT COLUMN: Document Preview -->
+      <div class="flex-1 min-w-0 border-r border-gray-200 bg-white p-4">
+        <embed id="documentPreview" src="{{fileUrl}}" type="application/pdf"
+          class="w-full h-full border border-gray-300 rounded-lg" />
+      </div>
+
+      <!-- RIGHT COLUMN: Extracted Data -->
+      <div class="w-[500px] flex-none flex flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50">
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-6" style="max-height: calc(100vh - 200px);">
+
+        <!-- Classification -->
+        <div class="mb-6 bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-md border border-blue-100 p-5">
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="col-span-1">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Document Type</label>
+              <select id="docType"
+                class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                <option value="INVOICE">📄 Invoice</option>
+                <option value="RECEIPT">🧾 Receipt</option>
+                <option value="OTHER">📋 Other Document</option>
+              </select>
+            </div>
+            <div class="col-span-1">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Direction</label>
+              <select id="documentDirection"
+                class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                <option value="received">📥 Received</option>
+                <option value="sent">📤 Sent</option>
+                <option value="unrecognized">❓ Unrecognized</option>
+              </select>
+            </div>
+          </div>
+          <div id="confidenceContainer" class="flex items-center gap-2">
+            <span class="text-xs font-medium text-gray-600">Confidence:</span>
+            <span id="confidence" class="text-sm font-medium text-blue-600"></span>
+          </div>
+        </div>          <!-- ========== INVOICE BLOCK ========== -->
+          <div id="invoiceBlock" class="hidden">
+
+            <!-- Invoice Type -->
+            <div id="invoiceTypeBlock" class="mb-6">
+              <label for="invoice_type" class="block text-xs font-medium text-gray-700 mb-1">Invoice Type</label>
+              <select id="invoice_type"
+                class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                <option value="STANDARD">Standard Invoice</option>
+                <option value="CREDIT_NOTE">Credit Note (Dobropis)</option>
+                <option value="DEBIT_NOTE">Debit Note (Ťarchopis)</option>
+              </select>
+            </div>
+
+            <!-- Accordions -->
+            <div class="space-y-3 mb-6">
+
+              <!-- Invoice Details -->
+              <div
+                class="border-2 border-blue-200 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-200">
+                <button type="button" onclick="toggleAccordion('invoiceDetails')"
+                  class="w-full px-4 py-3 text-left text-sm font-medium text-gray-900 bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 flex items-center justify-between cursor-pointer transition-all duration-200">
+                  <span>Invoice Details</span>
+                  <svg id="invoiceDetails-icon" class="w-5 h-5 transform transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div id="invoiceDetails" class="accordion-content overflow-hidden" style="max-height: 1000px;">
+                  <div class="p-5 bg-gradient-to-br from-white to-gray-50">
+                    <div class="grid grid-cols-2 gap-3">
+                      <div class="col-span-1">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Invoice Number</label>
+                        <div>
+                          <input id="invoice_number" type="text"
+                            class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                        </div>
+                      </div>
+                      <div class="col-span-1">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Variable Symbol</label>
+                        <div>
+                          <input id="variable_symbol" type="text"
+                            class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                        </div>
+                      </div>
+                      <div class="col-span-1">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Issue Date</label>
+                        <div>
+                          <input id="issue_date" type="date"
+                            class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                        </div>
+                      </div>
+                      <div class="col-span-1">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Delivery Date</label>
+                        <div>
+                          <input id="delivery_date" type="date"
+                            class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                        </div>
+                      </div>
+                      <div class="col-span-2">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Due Date</label>
+                        <div>
+                          <input id="due_date" type="date"
+                            class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                        </div>
+                      </div>
+                      <div id="associatedDocBlock" class="col-span-2 hidden">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Associated Document</label>
+                        <input id="associated_document" type="text"
+                          placeholder="Original invoice number for credit/debit notes"
+                          class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-gray-400" />
+                      </div>
+                      <div class="col-span-2">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Currency</label>
+                        <select id="currency"
+                          class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                          <option value="EUR">EUR</option>
+                          <option value="USD">USD</option>
+                          <option value="GBP">GBP</option>
+                          <option value="CZK">CZK</option>
+                          <option value="PLN">PLN</option>
+                          <option value="HUF">HUF</option>
+                          <option value="CHF">CHF</option>
+                          <option value="JPY">JPY</option>
+                          <option value="CNY">CNY</option>
+                          <option value="CAD">CAD</option>
+                          <option value="AUD">AUD</option>
+                          <option value="SEK">SEK</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Supplier Information -->
+              <div
+                class="border-2 border-blue-200 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-200">
+                <button type="button" onclick="toggleAccordion('supplierInfo')"
+                  class="w-full px-4 py-3 text-left text-sm font-medium text-gray-900 bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 flex items-center justify-between cursor-pointer transition-all duration-200">
+                  <span>Supplier Information</span>
+                  <svg id="supplierInfo-icon" class="w-5 h-5 transform transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div id="supplierInfo" class="accordion-content overflow-hidden" style="max-height: 1000px;">
+                  <div class="p-5 space-y-3 bg-gradient-to-br from-white to-gray-50">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Supplier Name</label>
+                      <input id="supplier_name" type="text"
+                        class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Supplier ICO</label>
+                        <input id="supplier_ico" type="text"
+                          class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Supplier Tax ID</label>
+                        <input id="supplier_tax_id" type="text"
+                          class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Supplier VAT ID</label>
+                      <input id="supplier_vat_id" type="text"
+                        class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Buyer Information -->
+              <div
+                class="border-2 border-blue-200 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-200">
+                <button type="button" onclick="toggleAccordion('buyerInfo')"
+                  class="w-full px-4 py-3 text-left text-sm font-medium text-gray-900 bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 flex items-center justify-between cursor-pointer transition-all duration-200">
+                  <span>Buyer Information</span>
+                  <svg id="buyerInfo-icon" class="w-5 h-5 transform transition-transform rotate-180" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div id="buyerInfo" class="accordion-content overflow-hidden" style="max-height: 0;">
+                  <div class="p-5 space-y-3 bg-gradient-to-br from-white to-gray-50">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Buyer Name</label>
+                      <input id="buyer_name" type="text"
+                        class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Buyer ICO</label>
+                        <input id="buyer_ico" type="text"
+                          class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Buyer Tax ID</label>
+                        <input id="buyer_tax_id" type="text"
+                          class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Buyer VAT ID</label>
+                      <input id="buyer_vat_id" type="text"
+                        class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Financial Summary -->
+              <div
+                class="border-2 border-blue-200 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-200">
+                <button type="button" onclick="toggleAccordion('financialInfo')"
+                  class="w-full px-4 py-3 text-left text-sm font-medium text-gray-900 bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 flex items-center justify-between cursor-pointer transition-all duration-200">
+                  <span>Financial Summary</span>
+                  <svg id="financialInfo-icon" class="w-5 h-5 transform transition-transform rotate-180" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div id="financialInfo" class="accordion-content overflow-hidden" style="max-height: 0;">
+                  <div class="p-5 space-y-3 bg-gradient-to-br from-white to-gray-50">
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Total Base</label>
+                        <div class="flex">
+                          <span
+                            class="inline-flex items-center px-2 text-xs font-medium text-gray-700 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md currency-symbol">EUR</span>
+                          <input id="total_base" type="number" step="0.01"
+                            class="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Discount</label>
+                        <div class="flex">
+                          <span
+                            class="inline-flex items-center px-2 text-xs font-medium text-gray-700 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md currency-symbol">EUR</span>
+                          <input id="discount" type="number" step="0.01"
+                            class="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Total VAT Amount</label>
+                        <div class="flex">
+                          <span
+                            class="inline-flex items-center px-2 text-xs font-medium text-gray-700 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md currency-symbol">EUR</span>
+                          <input id="total_vat_amount" type="number" step="0.01"
+                            class="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-900 mb-1">Total with VAT</label>
+                        <div class="flex">
+                          <span
+                            class="inline-flex items-center px-2 text-xs font-medium text-gray-700 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md currency-symbol">EUR</span>
+                          <input id="total_with_vat" type="number" step="0.01"
+                            class="flex-1 min-w-0 px-2 py-1 text-sm font-medium border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Information -->
+              <div
+                class="border-2 border-blue-200 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-200">
+                <button type="button" onclick="toggleAccordion('paymentInfo')"
+                  class="w-full px-4 py-3 text-left text-sm font-medium text-gray-900 bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 flex items-center justify-between cursor-pointer transition-all duration-200">
+                  <span>Payment Information</span>
+                  <svg id="paymentInfo-icon" class="w-5 h-5 transform transition-transform rotate-180" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div id="paymentInfo" class="accordion-content overflow-hidden" style="max-height: 0;">
+                  <div class="p-5 space-y-3 bg-gradient-to-br from-white to-gray-50">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Payment Method</label>
+                      <select id="payment_method"
+                        class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                        <option value="">Select payment method</option>
+                        <option value="BANK_TRANSFER">Bank Transfer</option>
+                        <option value="CASH">Cash</option>
+                        <option value="CARD">Card</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">IBAN</label>
+                      <input id="iban" type="text"
+                        class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Invoice Items -->
+            <h3 class="text-lg font-medium text-gray-900 mt-6 mb-3 flex items-center gap-2">
+              <span class="text-blue-600">■</span>
+              <span>Items</span>
+            </h3>
+            <div id="invoiceItemsContainer"></div>
+          </div>
+
+          <!-- ========== RECEIPT BLOCK ========== -->
+          <div id="receiptBlock" class="hidden">
+
+            <!-- Receipt Details -->
+            <div class="mb-6 bg-white rounded-xl p-5 shadow-lg border-2 border-green-200">
+              <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                <span class="text-green-600">■</span>
+                <span>Receipt Details</span>
+              </h3>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="col-span-1">
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Receipt Number</label>
+                  <input id="receipt_number" type="text"
+                    class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                </div>
+                <div class="col-span-1">
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                  <input id="receipt_date" type="date"
+                    class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                </div>
+                <div class="col-span-1">
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Time</label>
+                  <input id="receipt_time" type="time"
+                    class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                </div>
+                <div class="col-span-1">
+                  <label class="block text-xs font-medium text-gray-700 mb-1">UID (EKASA)</label>
+                  <input id="receipt_uid" type="text"
+                    class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                </div>
+                <div class="col-span-2">
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Currency</label>
+                  <select id="receipt_currency"
+                    class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                    <option value="GBP">GBP</option>
+                    <option value="CZK">CZK</option>
+                    <option value="PLN">PLN</option>
+                    <option value="HUF">HUF</option>
+                    <option value="CHF">CHF</option>
+                    <option value="JPY">JPY</option>
+                    <option value="CNY">CNY</option>
+                    <option value="CAD">CAD</option>
+                    <option value="AUD">AUD</option>
+                    <option value="SEK">SEK</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Receipt Accordions (similar structure to invoice) -->
+            <div class="space-y-3 mb-6">
+
+              <!-- Supplier Information -->
+              <div
+                class="border-2 border-blue-200 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-200">
+                <button type="button" onclick="toggleAccordion('receiptSupplierInfo')"
+                  class="w-full px-4 py-3 text-left text-sm font-medium text-gray-900 bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 flex items-center justify-between cursor-pointer transition-all duration-200">
+                  <span>Supplier Information</span>
+                  <svg id="receiptSupplierInfo-icon" class="w-5 h-5 transform transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div id="receiptSupplierInfo" class="accordion-content overflow-hidden" style="max-height: 1000px;">
+                  <div class="p-5 space-y-3 bg-gradient-to-br from-white to-gray-50">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Supplier Name</label>
+                      <input id="merchant_name" type="text"
+                        class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Supplier ICO</label>
+                        <input id="merchant_ico" type="text"
+                          class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Supplier VAT ID</label>
+                        <input id="merchant_vat_id" type="text"
+                          class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Supplier Address</label>
+                      <input id="merchant_address" type="text"
+                        class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Financial Summary -->
+              <div
+                class="border-2 border-blue-200 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-200">
+                <button type="button" onclick="toggleAccordion('receiptFinancialInfo')"
+                  class="w-full px-4 py-3 text-left text-sm font-medium text-gray-900 bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 flex items-center justify-between cursor-pointer transition-all duration-200">
+                  <span>Financial Summary</span>
+                  <svg id="receiptFinancialInfo-icon" class="w-5 h-5 transform transition-transform rotate-180"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div id="receiptFinancialInfo" class="accordion-content overflow-hidden" style="max-height: 0;">
+                  <div class="p-5 space-y-3 bg-gradient-to-br from-white to-gray-50">
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">VAT Base</label>
+                        <div class="flex">
+                          <span
+                            class="inline-flex items-center px-2 text-xs font-medium text-gray-700 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md currency-symbol">EUR</span>
+                          <input id="vat_base" type="number" step="0.01"
+                            class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">VAT Amount</label>
+                        <div class="flex">
+                          <span
+                            class="inline-flex items-center px-2 text-xs font-medium text-gray-700 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md currency-symbol">EUR</span>
+                          <input id="vat_amount" type="number" step="0.01"
+                            class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Subtotal</label>
+                        <div class="flex">
+                          <span
+                            class="inline-flex items-center px-2 text-xs font-medium text-gray-700 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md currency-symbol">EUR</span>
+                          <input id="subtotal" type="number" step="0.01"
+                            class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Rounding</label>
+                        <div class="flex">
+                          <span
+                            class="inline-flex items-center px-2 text-xs font-medium text-gray-700 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md currency-symbol">EUR</span>
+                          <input id="rounding" type="number" step="0.01"
+                            class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-900 mb-1">Total with VAT</label>
+                      <div class="flex">
+                        <span
+                          class="inline-flex items-center px-2 text-xs font-medium text-gray-700 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md currency-symbol">EUR</span>
+                        <input id="receipt_total" type="number" step="0.01"
+                          class="flex-1 px-2 py-1 text-sm font-medium border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Information -->
+              <div
+                class="border-2 border-blue-200 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-200">
+                <button type="button" onclick="toggleAccordion('receiptPaymentInfo')"
+                  class="w-full px-4 py-3 text-left text-sm font-medium text-gray-900 bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 flex items-center justify-between cursor-pointer transition-all duration-200">
+                  <span>Payment Information</span>
+                  <svg id="receiptPaymentInfo-icon" class="w-5 h-5 transform transition-transform rotate-180"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div id="receiptPaymentInfo" class="accordion-content overflow-hidden" style="max-height: 0;">
+                  <div class="p-5 bg-gradient-to-br from-white to-gray-50">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Payment Method</label>
+                      <select id="receipt_payment_method"
+                        class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                        <option value="">Select payment method</option>
+                        <option value="CASH">Cash</option>
+                        <option value="CARD">Card</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Receipt Items -->
+            <h3 class="text-lg font-medium text-gray-900 mt-6 mb-3 flex items-center gap-2">
+              <span class="text-green-600">■</span>
+              <span>Items</span>
+            </h3>
+            <div id="receiptItemsContainer"></div>
+          </div>
+
+          <!-- ========== OTHER DOCUMENT BLOCK ========== -->
+          <div id="otherBlock" class="hidden">
+            <div class="bg-white rounded-xl p-6 shadow-lg border-2 border-gray-300">
+              <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                <span class="text-gray-600">■</span>
+                <span>Other Document</span>
+              </h3>
+              <label class="block text-xs font-medium text-gray-700 mb-1.5">Note</label>
+              <textarea id="other_note" rows="4"
+                class="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"></textarea>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Accordion Toggle Script -->
+  <script>
+    // Track if changes have been made
+    let hasChanges = false;
+    let originalData = null;
+
+    // Make originalData accessible globally
+    window.originalData = null;
+
+    function toggleAccordion(id) {
+      const content = document.getElementById(id);
+      const icon = document.getElementById(id + '-icon');
+      const isOpen = content.style.maxHeight !== '0px';
+
+      if (isOpen) {
+        content.style.maxHeight = '0px';
+        content.style.opacity = '0';
+        icon.classList.add('rotate-180');
+      } else {
+        content.style.maxHeight = '1000px';
+        content.style.opacity = '1';
+        icon.classList.remove('rotate-180');
+      }
+    }
+
+    function markAsChanged() {
+      if (!hasChanges) {
+        hasChanges = true;
+        const cancelBtn = document.getElementById('cancelChangesBtn');
+        if (cancelBtn) {
+          cancelBtn.disabled = false;
+        }
+      }
+    }
+
+    function saveData() {
+      console.log('=== SAVING DATA ===');
+      console.log('Current extracted data:', JSON.stringify(currentData, null, 2));
+
+      // Update Frappe form field
+      if (typeof cur_frm !== 'undefined' && cur_frm) {
+        cur_frm.set_value('extracted_data', JSON.stringify(currentData));
+        cur_frm.save();
+      }
+
+      // Reset change tracking
+      hasChanges = false;
+      originalData = JSON.parse(JSON.stringify(currentData));
+      window.originalData = originalData;
+      const cancelBtn = document.getElementById('cancelChangesBtn');
+      if (cancelBtn) {
+        cancelBtn.disabled = true;
+      }
+
+      // Show success feedback
+      frappe.show_alert({
+        message: __('Data saved successfully'),
+        indicator: 'green'
+      }, 3);
+    }
+
+    function cancelChanges() {
+      if (!hasChanges) {
+        console.log('No changes to cancel');
+        return;
+      }
+
+      if (!window.originalData) {
+        console.log('No original data available');
+        return;
+      }
+
+      if (confirm('Are you sure you want to cancel all changes?')) {
+        // Reload the original data with a deep copy to avoid reference issues
+        loadExtractedData(JSON.parse(JSON.stringify(window.originalData)));
+
+        // Reset change tracking
+        hasChanges = false;
+        const cancelBtn = document.getElementById('cancelChangesBtn');
+        if (cancelBtn) {
+          cancelBtn.disabled = true;
+        }
+      }
+    }
+  </script>
+
+</div>
+
+</html>

@@ -16,7 +16,17 @@ import time
 
 
 class IncomingDocument(Document):
-
+  
+  def before_insert(self):
+    """Set document name from file name if not already set"""
+    if not self.doc_name and self.file_url:
+      # Extract filename from file URL
+      file_name = self.file_url.split('/')[-1]
+      # Remove file extension and clean up the name
+      if '.' in file_name:
+        file_name = file_name.rsplit('.', 1)[0]
+      self.doc_name = file_name
+  
   def _attach_files_to_document(self, target_doctype, target_docname):
     """Attach files from incoming document to target document"""
     if not self.file_url:
@@ -57,9 +67,11 @@ class IncomingDocument(Document):
       case "invoice":
         if company_name == normalize_name(data.get("supplier_name", "")):
           self.classification_reasoning += "Supplier name matches company name on the invoice = Sale Invoice"
+          self.document_direction = "issued"
           return "Sale Invoice"
         elif company_name == normalize_name(data.get("buyer_name", "")):
           self.classification_reasoning += "Customer name matches company name on the invoice = Purchase Invoice"
+          self.document_direction = "received"
           return "Purchase Invoice"
         else:
           self.classification_reasoning += "Supplier and Customer names do not match company name on the invoice"
@@ -68,10 +80,12 @@ class IncomingDocument(Document):
       case "receipt":
           if company_name == normalize_name(data.get("supplier_name", "")):
             self.classification_reasoning += "Supplier name matches company name on the receipt = Cash Payment"
-            return "Cash Payment"
+            self.document_direction = "issued"
           else:
             self.classification_reasoning += "Supplier name does not match company name on the receipt = Cash Receipt"
-            return "Cash Receipt"
+            self.document_direction = "received"
+          
+          return "Cash Book Entry"
           
       case _:
         self.classification_reasoning += f"Unknown document type: {classifiedType}"
@@ -119,7 +133,7 @@ class IncomingDocument(Document):
       return
     
     confidence = float(miner_response.get("classification", {}).get("confidence", 0))
-    if confidence < 0.9:
+    if confidence < 0.8:
       self.classification_reasoning = "Low confidence in classification"
       self.status = "Pending check"
       self.save()
@@ -148,10 +162,14 @@ class IncomingDocument(Document):
     frappe.msgprint("Data extraction completed and status updated to 'Processed'.")
 
   def _getPartner(self, partner_name, business_id = "", vat_id = ""):
-    # Check if partner exists using filters
-    existing_partners = frappe.get_all("Partner", filters={"partner_name": partner_name}, limit=1)
     
-    if existing_partners and (existing_partners[0].business_id == business_id or business_id == ""):
+    # Check if partner exists using filters
+    if business_id == "":
+      existing_partners = frappe.get_all("Partner", filters={"partner_name": partner_name}, limit=1)
+    else: 
+      existing_partners = frappe.get_all("Partner", filters={"partner_name": partner_name, "business_id": business_id}, limit=1)
+    
+    if existing_partners:
       # Partner exists, get the full document
       return frappe.get_doc("Partner", existing_partners[0].name)
     else:
@@ -201,7 +219,7 @@ def remove_linked_document(incoming_document_name):
 
 # Helpers
 
-def create_invoice(self, data):
+def create_invoice(incoming_document, data):
   items = []
   for item in data.get("items", []):
     items.append({
@@ -232,7 +250,7 @@ def create_invoice(self, data):
     payment_method = "Bank Transfer"
   
   invoice = frappe.get_doc({
-    "doctype": self.document_type,
+    "doctype": incoming_document.document_type,
     "issued_date": getdate(data.get("issue_date", None)),
     "delivery_date": getdate(data.get("delivery_date", None)),
     "due_date": getdate(data.get("due_date", None)),
@@ -249,22 +267,23 @@ def create_invoice(self, data):
   
   partner = None
   # Purchase Invoice
-  if self.document_type == "Purchase Invoice":
-    newNumber = get_next_naming_series_number(self.document_type)
+  if incoming_document.document_type == "Purchase Invoice":
+    newNumber = get_next_naming_series_number(incoming_document.document_type)
     invoice.internal_number = newNumber
     invoice.external_number = data.get("invoice_number", "")
 
-    partner = self._getPartner(data.get("supplier_name", ""), data.get("supplier_ico", ""), data.get("supplier_vat_id", ""))
+    print(data.get("supplier_name", ""), data.get("supplier_ico", ""), data.get("supplier_vat_id", ""))
+    partner = incoming_document._getPartner(data.get("supplier_name", ""), data.get("supplier_ico", ""), data.get("supplier_vat_id", ""))
     invoice.supplier = partner.name
     invoice.supplier_business_id = partner.business_id
     invoice.supplier_vat_id = partner.vat_id
     
 
   # Sale Invoice
-  elif self.document_type == "Sale Invoice": 
+  elif incoming_document.document_type == "Sale Invoice": 
     invoice.internal_number = data.get("invoice_number", "")
 
-    partner = self._getPartner(data.get("buyer_name", ""), data.get("buyer_ico", ""))
+    partner = incoming_document._getPartner(data.get("buyer_name", ""), data.get("buyer_ico", ""))
     invoice.customer = partner.name
     invoice.customer_business_id = partner.business_id
     invoice.customer_vat_id = partner.vat_id
@@ -276,13 +295,13 @@ def create_invoice(self, data):
     invoice.insert()
     
     # Attach incoming document file to invoice
-    self._attach_files_to_document(self.document_type, invoice.name)
+    incoming_document._attach_files_to_document(incoming_document.document_type, invoice.name)
     
     return invoice
   except Exception as e:
     return e
 
-def create_cash_receipt(self, data):
+def create_cash_receipt(incoming_document, data):
   items = []
   for item in data.get("items", []):
     items.append({
@@ -306,7 +325,7 @@ def create_cash_receipt(self, data):
     uid = ""
 
   cash_receipt = frappe.get_doc({
-    "doctype": self.document_type,
+    "doctype": incoming_document.document_type,
     "supplier": data.get("merchant_name", "Unknown"),
     "receipt_number": data.get("receipt_number", ""),
     "uid": uid,
@@ -319,18 +338,18 @@ def create_cash_receipt(self, data):
     "vat_amount": data.get("vat_amount", 0),
     "total": data.get("total_with_vat", 0),
     "rounding": data.get("rounding", 0),
-    "incoming_document": self.name
+    "incoming_document": incoming_document.name
   })
   
   
-  newNumber = get_next_naming_series_number(self.document_type)
+  newNumber = get_next_naming_series_number(incoming_document.document_type)
   cash_receipt.internal_number = newNumber
 
   try:
     cash_receipt.insert()
     
     # Attach incoming document file to cash receipt
-    self._attach_files_to_document("Cash Receipt", cash_receipt.name)
+    incoming_document._attach_files_to_document("Cash Receipt", cash_receipt.name)
     
     return cash_receipt
   except Exception as e:

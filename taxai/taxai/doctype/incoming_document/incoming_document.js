@@ -2,30 +2,74 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Incoming Document", {
-  refresh(frm) {
 
-    frm.add_custom_button(__('Mine Document'), function () {
-      mineDocument(frm.doc.name);
+  onload(frm) {
+
+    const container = $(`
+    <div style="height: calc(100vh - 52px); overflow: hidden;">
+      <iframe
+        id="taxai-react-frame"
+        src="/assets/taxai/react/index.html?doc=${frm.doc.name}"
+        style="width:100%; height:100%; border:0; background:white;"
+      ></iframe>
+    </div>
+  `);
+
+    $(frm.page.wrapper).html(container);
+    console.log(frm.doc);
+
+
+    window.addEventListener("message", (event) => {
+      if (event.origin !== window.location.origin) return;
+
+      const data = event.data;
+      if (data?.type === "PARENT_ROUTE" && Array.isArray(data.route)) {
+        frappe.set_route(...data.route);
+      }
     });
+  },
+
+
+  refresh(frm) {
+    return
+    frm.page.add_inner_button(__(frm.doc.extracted_data ? 'Extract data again' : 'Extract data'), function () {
+      mineDocument(frm.doc.name);
+    }, null, 'secondary');
 
 
     if (!frm.is_new()) {
-      frm.add_custom_button('Create', () => {
+      // frm.disable_save();
 
-        createAccountingDocument(frm.doc.name);
-      }, 'Accounting document');
+      if (!frm.doc.linked_accounting_document) {
+        frm.page.add_inner_button('Create document', () => {
 
-      frm.add_custom_button('Delete linked', () => {
-        console.log(frm.doc.name);
-        
-        frappe.confirm(
-          __('Are you sure you want to delete the linked accounting document?'),
-          () => {
-            // Yes action
-            deleteLinkedAccountingDocument(frm.doc.name);
-          })
-      }, 'Accounting document');
+          createAccountingDocument(frm.doc.name);
+        }, null, 'primary');
 
+      } else {
+        frm.add_custom_button('Create', () => {
+
+          createAccountingDocument(frm.doc.name);
+        }, 'Accounting document');
+
+        frm.add_custom_button('Delete linked', () => {
+          frappe.confirm(
+            __('Are you sure you want to delete the linked accounting document?'),
+            () => {
+              // Yes action
+              deleteLinkedAccountingDocument(frm.doc.name);
+            })
+        }, 'Accounting document');
+      }
+
+
+      // Render Document Viewer tab
+      if (frm.doc.file_url) {
+        // Load document viewer component
+        frappe.require('/assets/taxai/js/document_viewer/docviewer.js', () => {
+          window.renderDocumentViewer(frm);
+        });
+      }
     }
 
   },

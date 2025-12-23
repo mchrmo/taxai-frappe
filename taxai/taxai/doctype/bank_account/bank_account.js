@@ -8,7 +8,7 @@ frappe.ui.form.on("Bank Account", {
         method: 'taxai.integrations.bank_sync.sync_bank_transactions',
         args: {
           bank_account_name: frm.doc.name,
-          from_date: frappe.datetime.add_days(frappe.datetime.get_today(), -30)
+          from_date: frappe.datetime.add_days(frappe.datetime.get_today(), -60)
         },
         freeze: true,
         freeze_message: __('Syncing transactions...'),

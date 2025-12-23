@@ -1,0 +1,88 @@
+account_name,account_number,account_type,account_category,account_kind,class,parent_account
+"Neobežný majetok","01","Asset","Aktíva","Rozvahový","0","0"
+"Dlhodobý nehmotný majetok","011","Asset","Aktíva","Rozvahový","0","01"
+"Nehmotné výsledky vývoja","012","Asset","Aktíva","Rozvahový","0","01"
+"Software","013","Asset","Aktíva","Rozvahový","0","01"
+"Oceniteľné práva","014","Asset","Aktíva","Rozvahový","0","01"
+"Goodwill","015","Asset","Aktíva","Rozvahový","0","01"
+"Ostatný dlhodobý nehmotný majetok","019","Asset","Aktíva","Rozvahový","0","01"
+
+"Dlhodobý hmotný majetok","02","Asset","Aktíva","Rozvahový","0","0"
+"Pozemky","021","Asset","Aktíva","Rozvahový","0","02"
+"Stavby","022","Asset","Aktíva","Rozvahový","0","02"
+"Samostatné hnuteľné veci","023","Asset","Aktíva","Rozvahový","0","02"
+"Technické zhodnotenie","024","Asset","Aktíva","Rozvahový","0","02"
+"Ostatný dlhodobý hmotný majetok","029","Asset","Aktíva","Rozvahový","0","02"
+
+"Dlhodobý finančný majetok","06","Asset","Aktíva","Rozvahový","0","0"
+"Aktívne účasti a podiely","061","Asset","Aktíva","Rozvahový","0","06"
+"Požičky dlhodobé","066","Asset","Aktíva","Rozvahový","0","06"
+
+"Zásoby","11","Asset","Aktíva","Rozvahový","1","1"
+"Materiál","112","Asset","Aktíva","Rozvahový","1","11"
+"Materiál na sklade","111","Asset","Aktíva","Rozvahový","1","11"
+"Materiál na ceste","119","Asset","Aktíva","Rozvahový","1","11"
+
+"Nedokončená výroba","12","Asset","Aktíva","Rozvahový","1","1"
+"Nedokončená výroba vlastná","121","Asset","Aktíva","Rozvahový","1","12"
+
+"Výrobky","13","Asset","Aktíva","Rozvahový","1","1"
+"Výrobky na sklade","131","Asset","Aktíva","Rozvahový","1","13"
+
+"Tovar","13","Asset","Aktíva","Rozvahový","1","1"
+"Tovar na sklade","132","Asset","Aktíva","Rozvahový","1","13"
+"Tovar na ceste","139","Asset","Aktíva","Rozvahový","1","13"
+
+"Pokladnica","211","Asset","Aktíva","Rozvahový","2","21"
+"Pokladnica – EUR","2111","Asset","Aktíva","Rozvahový","2","211"
+"Pokladnica – valuta","2112","Asset","Aktíva","Rozvahový","2","211"
+
+"Bankové účty","221","Asset","Aktíva","Rozvahový","2","22"
+"Bežný účet","2211","Asset","Aktíva","Rozvahový","2","221"
+"Valutový účet","2212","Asset","Aktíva","Rozvahový","2","221"
+
+"Pohľadávky","31","Asset","Aktíva","Rozvahový","3","3"
+"Odberatelia","311","Asset","Aktíva","Rozvahový","3","31"
+"Zmenky na inkaso","312","Asset","Aktíva","Rozvahový","3","31"
+"Poskytnuté preddavky","314","Asset","Aktíva","Rozvahový","3","31"
+"Zamestnanci – pohľadávky","335","Asset","Aktíva","Rozvahový","3","31"
+
+"Záväzky","32","Liability","Pasíva","Rozvahový","3","3"
+"Dodávatelia","321","Liability","Pasíva","Rozvahový","3","32"
+"Zamestnanci – záväzky","331","Liability","Pasíva","Rozvahový","3","32"
+"Daňové záväzky","341","Liability","Pasíva","Rozvahový","3","32"
+"DPH – záväzok","343","Liability","Pasíva","Rozvahový","3","34"
+"DPH – pohľadávka","343A","Asset","Aktíva","Rozvahový","3","34"
+
+"Vlastné imanie","41","Equity","Vlastné imanie","Rozvahový","4","4"
+"Základné imanie","411","Equity","Vlastné imanie","Rozvahový","4","41"
+"Emisné ážio","412","Equity","Vlastné imanie","Rozvahový","4","41"
+"Nerozdelený zisk","428","Equity","Vlastné imanie","Rozvahový","4","41"
+"Neuhrazená strata","429","Equity","Vlastné imanie","Rozvahový","4","41"
+
+"Náklady – spotreba","50","Expense","Náklady","Výsledkový","5","5"
+"Spotreba materiálu","501","Expense","Náklady","Výsledkový","5","50"
+"Spotreba energie","502","Expense","Náklady","Výsledkový","5","50"
+"Spotreba tovaru","504","Expense","Náklady","Výsledkový","5","50"
+
+"Služby","51","Expense","Náklady","Výsledkový","5","5"
+"Cestovné","512","Expense","Náklady","Výsledkový","5","51"
+"Telefón/Internet","518","Expense","Náklady","Výsledkový","5","51"
+"Ostatné služby","518A","Expense","Náklady","Výsledkový","5","51"
+
+"Mzdové náklady","52","Expense","Náklady","Výsledkový","5","5"
+"Mzdy","521","Expense","Náklady","Výsledkový","5","52"
+"Zákonné odvody","524","Expense","Náklady","Výsledkový","5","52"
+
+"Ostatné náklady","54","Expense","Náklady","Výsledkový","5","5"
+"Úroky","562","Expense","Náklady","Výsledkový","5","54"
+"Kurzové straty","563","Expense","Náklady","Výsledkový","5","54"
+
+"Tržby","60","Income","Výnosy","Výsledkový","6","6"
+"Tržby za tovar","601","Income","Výnosy","Výsledkový","6","60"
+"Tržby za výrobky","602","Income","Výnosy","Výsledkový","6","60"
+"Tržby za služby","602A","Income","Výnosy","Výsledkový","6","60"
+
+"Ostatné výnosy","64","Income","Výnosy","Výsledkový","6","6"
+"Úroky","662","Income","Výnosy","Výsledkový","6","64"
+"Kurzové zisky","663","Income","Výnosy","Výsledkový","6","64"

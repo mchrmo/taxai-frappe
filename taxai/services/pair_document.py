@@ -5,7 +5,7 @@ import frappe
 def pair_invoice_with_bank_transaction(invoice_doctype, invoice_name, variable_symbol_field="variable_symbol"):
     """
     Generic function to pair any invoice type with bank transaction based on variable symbol and amount.
-    Updates both documents with references to each other.
+    Adds a payment record to the invoice and updates the bank transaction reference.
     
     Args:
         invoice_doctype (str): DocType name (e.g., "Sale Invoice", "Purchase Invoice")
@@ -56,13 +56,18 @@ def pair_invoice_with_bank_transaction(invoice_doctype, invoice_name, variable_s
             }
         
         # Get the matching bank transaction
-        bank_transaction_name = bank_transactions[0]["name"]
+        bank_transaction_data = bank_transactions[0]
+        bank_transaction_name = bank_transaction_data["name"]
         bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
         
-        # Update invoice with payment document reference
-        invoice.payment_document_type = "Bank Transaction"
-        invoice.payment_document = bank_transaction_name
-        invoice.save()
+        # Add payment record to invoice
+        invoice.add_payment_record(
+            payment_doctype="Bank Transaction",
+            payment_doc=bank_transaction_name,
+            amount=abs(bank_transaction_data["amount"]),
+            date=bank_transaction_data["date"],
+            payment_type="Bank"
+        )
         
         # Update bank transaction with accounting document reference
         bank_transaction.accounting_document_type = invoice_doctype
@@ -75,12 +80,73 @@ def pair_invoice_with_bank_transaction(invoice_doctype, invoice_name, variable_s
             "invoice_type": invoice_doctype,
             "invoice_name": invoice_name,
             "bank_transaction": bank_transaction_name,
-            "amount": invoice.total,
+            "amount": abs(bank_transaction_data["amount"]),
             "variable_symbol": variable_symbol
         }
         
     except Exception as e:
         frappe.log_error(f"Error pairing {invoice_doctype} {invoice_name}: {str(e)}")
+        return {
+            "success": False,
+            "message": f"Error: {str(e)}"
+        }
+
+
+def manual_pair_invoice_with_transaction(invoice_doctype, invoice_name, bank_transaction_name):
+    """
+    Manually pair an invoice with a specific bank transaction.
+    Adds a payment record to the invoice regardless of amount matching.
+    
+    Args:
+        invoice_doctype (str): DocType name (e.g., "Sale Invoice", "Purchase Invoice")
+        invoice_name (str): Name of the invoice document
+        bank_transaction_name (str): Name of the bank transaction
+        
+    Returns:
+        dict: Result containing success status and paired transaction info
+    """
+    try:
+        # Get the invoice and bank transaction
+        invoice = frappe.get_doc(invoice_doctype, invoice_name)
+        bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+        
+        # Check if this transaction is already paired with this invoice
+        for record in invoice.payment_records:
+            if record.payment_doc == bank_transaction_name:
+                return {
+                    "success": False,
+                    "message": f"Bank Transaction {bank_transaction_name} is already paired with this invoice"
+                }
+        
+        # If bank transaction is paired with another invoice, unpair it first
+        if bank_transaction.accounting_document:
+            unpair_bank_transaction(bank_transaction_name)
+        
+        # Add payment record to invoice
+        invoice.add_payment_record(
+            payment_doctype="Bank Transaction",
+            payment_doc=bank_transaction_name,
+            amount=abs(bank_transaction.amount),
+            date=bank_transaction.date,
+            payment_type="Bank"
+        )
+        
+        # Update bank transaction with accounting document reference
+        bank_transaction.accounting_document_type = invoice_doctype
+        bank_transaction.accounting_document = invoice_name
+        bank_transaction.save()
+        
+        return {
+            "success": True,
+            "message": f"Successfully paired {invoice_doctype} {invoice_name} with Bank Transaction {bank_transaction_name}",
+            "invoice_type": invoice_doctype,
+            "invoice_name": invoice_name,
+            "bank_transaction": bank_transaction_name,
+            "amount": abs(bank_transaction.amount)
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Error manually pairing {invoice_doctype} {invoice_name} with {bank_transaction_name}: {str(e)}")
         return {
             "success": False,
             "message": f"Error: {str(e)}"
@@ -121,7 +187,6 @@ def auto_pair_all_unpaired_documents():
         unpaired_sale_invoices = frappe.get_all(
             "Sale Invoice",
             filters={
-                "payment_document": ["is", "not set"],
                 "variable_symbol": ["!=", ""],
                 "total": [">", 0]
             },
@@ -132,7 +197,6 @@ def auto_pair_all_unpaired_documents():
         unpaired_purchase_invoices = frappe.get_all(
             "Purchase Invoice",
             filters={
-                "payment_document": ["is", "not set"],
                 "external_number": ["!=", ""],
                 "total": [">", 0]
             },
@@ -186,6 +250,7 @@ def auto_pair_all_unpaired_documents():
 def unpair_documents(sale_invoice_name=None, purchase_invoice_name=None, bank_transaction_name=None):
     """
     Remove pairing between invoices and bank transactions.
+    Removes payment records from invoices and clears bank transaction references.
     
     Args:
         sale_invoice_name (str, optional): Name of Sale Invoice to unpair
@@ -198,77 +263,23 @@ def unpair_documents(sale_invoice_name=None, purchase_invoice_name=None, bank_tr
     try:
         updated_docs = []
         
-        # Handle sale invoice unpairing
-        if sale_invoice_name:
+        # Handle sale invoice unpairing (remove specific payment record)
+        if sale_invoice_name and bank_transaction_name:
             sale_invoice = frappe.get_doc("Sale Invoice", sale_invoice_name)
-            paired_transaction = sale_invoice.payment_document
-            
-            # Clear payment document fields
-            sale_invoice.payment_document_type = None
-            sale_invoice.payment_document = None
-            sale_invoice.save()
+            sale_invoice.remove_payment_record(bank_transaction_name)
             updated_docs.append(f"Sale Invoice {sale_invoice_name}")
-            
-            # If there was a paired transaction, clear its reference too
-            if paired_transaction:
-                try:
-                    bank_transaction = frappe.get_doc("Bank Transaction", paired_transaction)
-                    bank_transaction.accounting_document_type = None
-                    bank_transaction.accounting_document = None
-                    bank_transaction.save()
-                    updated_docs.append(f"Bank Transaction {paired_transaction}")
-                except:
-                    pass  # Transaction might not exist anymore
         
-        # Handle purchase invoice unpairing
-        if purchase_invoice_name:
+        # Handle purchase invoice unpairing (remove specific payment record)
+        if purchase_invoice_name and bank_transaction_name:
             purchase_invoice = frappe.get_doc("Purchase Invoice", purchase_invoice_name)
-            paired_transaction = purchase_invoice.payment_document
-            
-            # Clear payment document fields
-            purchase_invoice.payment_document_type = None
-            purchase_invoice.payment_document = None
-            purchase_invoice.save()
+            purchase_invoice.remove_payment_record(bank_transaction_name)
             updated_docs.append(f"Purchase Invoice {purchase_invoice_name}")
-            
-            # If there was a paired transaction, clear its reference too
-            if paired_transaction:
-                try:
-                    bank_transaction = frappe.get_doc("Bank Transaction", paired_transaction)
-                    bank_transaction.accounting_document_type = None
-                    bank_transaction.accounting_document = None
-                    bank_transaction.save()
-                    if f"Bank Transaction {paired_transaction}" not in updated_docs:
-                        updated_docs.append(f"Bank Transaction {paired_transaction}")
-                except:
-                    pass  # Transaction might not exist anymore
         
         # Handle bank transaction unpairing
         if bank_transaction_name:
-            bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
-            paired_invoice = bank_transaction.accounting_document
-            paired_invoice_type = bank_transaction.accounting_document_type
-            
-            # Clear accounting document fields
-            bank_transaction.accounting_document_type = None
-            bank_transaction.accounting_document = None
-            bank_transaction.save()
-            
+            unpair_bank_transaction(bank_transaction_name)
             if f"Bank Transaction {bank_transaction_name}" not in updated_docs:
                 updated_docs.append(f"Bank Transaction {bank_transaction_name}")
-            
-            # If there was a paired invoice, clear its reference too
-            if paired_invoice and paired_invoice_type:
-                doc_string = f"{paired_invoice_type} {paired_invoice}"
-                if doc_string not in updated_docs:
-                    try:
-                        invoice = frappe.get_doc(paired_invoice_type, paired_invoice)
-                        invoice.payment_document_type = None
-                        invoice.payment_document = None
-                        invoice.save()
-                        updated_docs.append(doc_string)
-                    except:
-                        pass  # Invoice might not exist anymore
         
         return {
             "success": True,
@@ -282,6 +293,37 @@ def unpair_documents(sale_invoice_name=None, purchase_invoice_name=None, bank_tr
             "success": False,
             "message": f"Error: {str(e)}"
         }
+
+
+def unpair_bank_transaction(bank_transaction_name):
+    """
+    Unpair a bank transaction from its linked invoice.
+    Removes the payment record from the invoice and clears transaction reference.
+    
+    Args:
+        bank_transaction_name (str): Name of Bank Transaction to unpair
+    """
+    try:
+        bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+        paired_invoice = bank_transaction.accounting_document
+        paired_invoice_type = bank_transaction.accounting_document_type
+        
+        # Clear accounting document fields
+        bank_transaction.accounting_document_type = None
+        bank_transaction.accounting_document = None
+        bank_transaction.save()
+        
+        # If there was a paired invoice, remove the payment record
+        if paired_invoice and paired_invoice_type:
+            try:
+                invoice = frappe.get_doc(paired_invoice_type, paired_invoice)
+                invoice.remove_payment_record(bank_transaction_name)
+            except:
+                pass  # Invoice might not exist anymore
+                
+    except Exception as e:
+        frappe.log_error(f"Error unpairing bank transaction {bank_transaction_name}: {str(e)}")
+        raise
 
 
 def pair_sale_invoice(invoice_number):

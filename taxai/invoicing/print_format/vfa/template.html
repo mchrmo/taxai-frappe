@@ -31,9 +31,9 @@
           <div>Madočany 477</div>
           <div>034 83 Liptovská Teplá</div>
           <div class="mt-2">
-            <div>IČO: 12345678</div>
-            <div>DIČ: 1234567890</div>
-            <div>IČ DPH: SK1234567890</div>
+            <div>IČO: 54524717</div>
+            <div>DIČ: 2121734164</div>
+            <div>IČ DPH: SK2121734164</div>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@
                   <div class="fw-semibold">{{item.item_name}}</div>
                   {%- if item.description -%}<div class="small text-muted">{{item.description}}</div>{% endif %}
                 </td>
-                <td class="text-end text-nowrap">{{item.qty}}x</td>
+                <td class="text-end text-nowrap">{{item.quantity}}x</td>
                 <td class="text-end text-nowrap">{{frappe.format(item.unit_price, {'fieldtype': 'Currency'})}}</td>
                 <td class="text-end text-nowrap">{{frappe.format(item.vat_rate, {'fieldtype': 'Percentage'})}} %</td>
                 <td class="text-end text-nowrap">{{frappe.format(item.total, {'fieldtype': 'Currency'})}}</td>

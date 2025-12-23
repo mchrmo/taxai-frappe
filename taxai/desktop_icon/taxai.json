@@ -1,0 +1,20 @@
+{
+ "app": "taxai",
+ "creation": "2025-11-21 14:49:15.966407",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "App",
+ "idx": 0,
+ "label": "Taxai",
+ "link": "/app/taxai",
+ "link_to": "",
+ "link_type": "External",
+ "logo_url": "/assets/taxai/taxai_ico.svg",
+ "modified": "2025-11-21 15:06:43.867217",
+ "modified_by": "Administrator",
+ "name": "Taxai",
+ "owner": "Administrator",
+ "roles": [],
+ "standard": 1
+}

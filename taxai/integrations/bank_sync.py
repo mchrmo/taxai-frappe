@@ -58,6 +58,10 @@ def sync_bank_transactions(bank_account_name, from_date=datetime.now(), to_date=
               "opponent_account": _fio_get_value(transaction, 2),
               "reference": _fio_get_value(transaction, 16),
           }
+          
+          if not transaction_data['comment']:
+              transaction_data['comment'] = _fio_get_value(transaction, 16)
+              
           _create_bank_transaction(bank_account_name, transaction_data)
 
       return account_statement['info']
